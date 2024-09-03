@@ -6,13 +6,13 @@
 #include <sstream>
 #include <string>
 #include <numeric>
+#include <ios>
 
 struct Student {
     std::string last_name{};
     std::string name{};
     std::vector<std::string> course_vec;
     std::vector<std::vector<int>> grade;
-    //int average_rat{};
 };
 
 int main()
@@ -23,38 +23,87 @@ int main()
     int grade{};
     float aver_rat_course{};
     float aver_rat_all{};
+    std::string str{};
+    int count{};
+    std::vector <std::string> read_file;
+    int mode{};
+    int flag = 1;
+
     std::cout << "Enter the student's last and first names: ";
     std::cin >> s.last_name >> s.name;
-    std::ofstream MF("D:\\students\\" + s.last_name + ".txt");
-    MF << s.last_name << "\t" << s.name << "\n";
-    std::cout << "\nEnter the number of courses: ";
-    std::cin >> num_of_courses;
-    std::string str{};
-    std::vector<int> grade_in;
-    for (int i = 0; i < num_of_courses; i++) {
-        str = {};
-        grade_in = {};
-        std::cout << "\nEnter the name of course: ";
-        std::cin >> course_name;
-        s.course_vec.push_back(course_name);
-        MF << course_name<<"\t";
-        std::cout << "\nEnter the grades for this course using the space bar: ";
-        std::cin.get();
-        std::getline(std::cin, str);
-        std::istringstream ss(str);
-        while (ss >> grade) {
-            grade_in.push_back(grade);
-            MF << grade << "\t";
+    
+    std::ifstream MF("D:\\students\\" + s.last_name + ".txt");
+
+    if (!MF.is_open()) {
+        std::cout << "The student has not been found. A new file will be created." << std::endl;
+
+        std::ofstream MF2("D:\\students\\" + s.last_name + ".txt");
+        MF2 << s.last_name << "\t" << s.name << "\n";
+        std::cout << "\nEnter the number of courses: ";
+        std::cin >> num_of_courses;
+        for (int i = 0; i < num_of_courses; i++) {
+            str = {};
+            std::cout << "\nEnter the name of course: ";
+            std::cin >> course_name;
+            MF2 << course_name << "\t";
+            std::cout << "\nEnter the grades for this course using the space bar: ";
+            std::cin.get();
+            std::getline(std::cin, str);
+            std::istringstream ss(str);
+            while (ss >> grade) {
+                MF2 << grade << " ";
+            }
+            MF2 << "\n";
+            MF2.close();
         }
-        aver_rat_course = (float)std::accumulate(grade_in.begin(), grade_in.end(), 0) / std::size(grade_in);
-        MF << "\t" << aver_rat_course << "\t";
-        std::cout << aver_rat_course << std::endl;
-        s.grade.push_back(grade_in);
-        aver_rat_all += aver_rat_course;
-        MF << "\n";
     }
-    aver_rat_all /= num_of_courses;
-    MF << "Average grade for all courses: " << aver_rat_all;
+    else {
+        while(std::getline(MF, str)){
+            read_file.push_back(str);
+        }
+        std::ofstream MF2("D:\\students\\" + s.last_name + ".txt",std::ios_base::app);
+       
+        std::cout << count << std::endl;
+        std::cout << "If you want to add a course to a student" << s.last_name << " " << s.name << ", press 1\n" <<
+            "If you want to add grades to a student" << s.last_name << " " << s.name << ", press 2\n" <<
+            "If you want average grade for the course, press 3\n" <<
+            "If you want to know the average grade of a student " << s.last_name << " " << s.name << "for all courses, press 4\n";
+        std::cin >> mode;
+        size_t ind{};
+        while(flag){
+            switch (mode) {
+            case 1:
+                std::cout << "Enter the name of course: ";
+                std::cin >> course_name;
+                MF2 << course_name << "\t";
+                break;
+            case 2:
+                std::cout << "Enter the name of course: ";
+                std::cin >> course_name;
+                for (std::string& i : read_file) {
+                    if (i.find(course_name) == std::string::npos) {
+                        count++;
+                    }
+
+                }
+                if (count) {
+                    std::cout << "\nEnter the grades for this course using the space bar: ";
+                    std::cin.get();
+                    std::getline(std::cin, str);
+                    read_file[count] += str;
+                    std::ofstream MF3("D:\\students\\" + s.last_name + ".txt");
+                    for (std::string& i : read_file) {
+                        MF3 << i << "\n";
+                    }
+
+                }
+                break;
+            case 3:
+
+            default: std::cout << "Exit"; flag = 0;
+            }
+        }
+    }
 
     
 }
